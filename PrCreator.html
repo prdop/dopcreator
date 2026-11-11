@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOP Creator 💜 นักสร้างสรรค์สื่อคุมประพฤติ</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --bg-grad: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+    }
+    
+    body {
+      font-family: 'Prompt', sans-serif;
+      font-size: 1.15rem; 
+      background: var(--bg-grad);
+      background-attachment: fixed;
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .main-container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      padding: 30px;
+      margin-top: 50px; 
+      margin-bottom: 30px;
+      backdrop-filter: blur(10px);
+    }
+
+    h1, h3, h4, h5 {
+      font-weight: 600;
+    }
+
+    .text-gradient {
+      background: var(--primary-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .btn-gradient {
+      background: var(--primary-grad);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 25px;
+      font-size: 1.2rem;
+      transition: all 0.3s;
+    }
+
+    .btn-gradient:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+      color: white;
+    }
+
+    .form-label {
+      font-weight: 500;
+      color: #444;
+    }
+
+    .form-control, .form-select {
+      border-radius: 8px;
+      padding: 10px 15px;
+      font-size: 1.1rem;
+      border: 1px solid #ccc;
+    }
+    
+    .form-control:focus, .form-select:focus {
+      border-color: #764ba2;
+      box-shadow: 0 0 0 0.25rem rgba(118, 75, 162, 0.25);
+    }
+
+    .table th {
+      background: var(--primary-grad);
+      color: white;
+      text-align: center;
+      vertical-align: middle;
+    }
+    
+    .table td {
+      vertical-align: middle;
+    }
+
+    .section-title {
+      background: #f1ebfd;
+      padding: 15px;
+      border-left: 5px solid #764ba2;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      margin-top: 30px;
+    }
+
+    .admin-btn-container {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      z-index: 1000;
+    }
+    .admin-btn {
+      background: rgba(255,255,255,0.9);
+      border: 1px solid rgba(118, 75, 162, 0.3);
+      color: #764ba2;
+      font-weight: 500;
+      border-radius: 50px;
+      padding: 8px 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: all 0.3s;
+    }
+    .admin-btn:hover {
+      background: var(--primary-grad);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .dash-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      border-left: 5px solid #764ba2;
+    }
+
+    .form-check-input {
+      width: 1.5em;
+      height: 1.5em;
+      margin-top: 0.15em;
+      cursor: pointer;
+    }
+    .form-check-input:checked {
+      background-color: #764ba2;
+      border-color: #764ba2;
+    }
+    .form-check-label {
+      cursor: pointer;
+      margin-left: 0.5rem;
+      padding-top: 0.15rem;
+      color: #444;
+    }
+    .custom-dotted-input {
+      border-bottom: 1.5px dotted #999;
+      border-top: none; 
+      border-left: none; 
+      border-right: none; 
+      border-radius: 0; 
+      background: transparent;
+      padding: 5px;
+    }
+    .custom-dotted-input:focus {
+      background: transparent;
+      box-shadow: none;
+      border-bottom: 1.5px solid #764ba2;
+    }
+
+    .mascot-btn {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      width: 140px; 
+      height: auto;
+      z-index: 9999;
+      cursor: pointer;
+      filter: drop-shadow(0px 5px 10px rgba(0,0,0,0.25));
+      transition: transform 0.3s ease;
+    }
+    .mascot-btn:hover {
+      transform: translateY(-8px) scale(1.05);
+    }
+    @media (max-width: 768px) {
+      .mascot-btn {
+        width: 100px; 
+        bottom: 15px;
+        right: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="admin-btn-container">
+  <button class="admin-btn" data-bs-toggle="modal" data-bs-target="#adminLoginModal">
+    ผู้ดูแลระบบ
+  </button>
+</div>
+
+<div class="container main-container" id="mainContainer">
+  <div class="text-center mb-4">
+    <h1 class="text-gradient">✨ DOP Creator ✨</h1>
+    <h3>นักสร้างสรรค์สื่อคุมประพฤติ 🎥</h3>
+    
+    <div class="mt-4 p-3" style="background: rgba(118, 75, 162, 0.05); border-radius: 10px;">
+      <h5 class="fw-bold" style="color: #764ba2;">แบบฟอร์มเสนอชื่อบุคลากรด้านการสื่อสารประชาสัมพันธ์ (Influencer / Content Creator) ของกรมคุมประพฤติ</h5>
+      <p class="mb-0 text-muted"><b>คำชี้แจง:</b> โปรดกรอกข้อมูลให้ครบถ้วนตามข้อเท็จจริง<br>หากมีหลายช่องทางออนไลน์หรือผลงานหลายรายการ สามารถแนบเอกสารเพิ่มเติมได้</p>
+    </div>
+  </div>
+
+  <div id="registerSection">
+    <form id="regForm">
+      
+      <div class="section-title">
+        <h5>🏢 ส่วนที่ ๑: ข้อมูลสำนักงานและข้อมูลผู้ได้รับการเสนอชื่อ</h5>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">ชื่อหน่วยงาน (สำนักงาน/กอง/สำนัก) <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" name="agency" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">ชื่อ - นามสกุล <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" name="fullname" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">ตำแหน่ง <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" name="position" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">ประเภทบุคลากร <span class="text-danger">*</span></label>
+          <select class="form-select" name="empType" required>
+            <option value="" selected disabled>เลือกประเภท...</option>
+            <option value="ข้าราชการ">ข้าราชการ</option>
+            <option value="พนักงานราชการ">พนักงานราชการ</option>
+            <option value="ลูกจ้างประจำ">ลูกจ้างประจำ</option>
+            <option value="ลูกจ้างชั่วคราว">ลูกจ้างชั่วคราว</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">สังกัด กลุ่มงาน / ฝ่าย <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" name="department" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">โทรศัพท์ติดต่อ <span class="text-danger">*</span></label>
+          <input type="tel" class="form-control" name="phone" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">อีเมล 📧 <span class="text-danger">*</span></label>
+          <input type="email" class="form-control" name="email" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">ชื่อผู้ประสานงานของสำนักงาน (ถ้ามี)</label>
+          <input type="text" class="form-control" name="coordinator">
+        </div>
+        <div class="col-12">
+          <label class="form-label">🌟 จุดเด่นหรือความสามารถเฉพาะตัวที่เหมาะสม *</label>
+          <textarea class="form-control" name="strengths" rows="2" required></textarea>
+        </div>
+      </div>
+
+      <div class="section-title d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <h5 class="m-0">📱 ส่วนที่ ๒: ข้อมูลช่องทางสื่อสังคมออนไลน์และยอดผู้ติดตาม</h5>
+        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addSocialRow()">+ เพิ่มช่องทาง</button>
+      </div>
+      <small class="text-muted d-block mb-3">โปรดระบุ URL ที่สามารถเปิดดูได้ และจำนวนผู้ติดตาม หรือผู้ติดตามช่อง ณ วันที่กรอกข้อมูล หากไม่มีให้ระบุ “ไม่มี”</small>
+      
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+          <thead>
+            <tr>
+              <th width="5%">ลำดับ</th>
+              <th width="15%">แพลตฟอร์ม/ช่องทาง</th>
+              <th width="25%">ชื่อบัญชี/ชื่อช่อง</th>
+              <th width="25%">URL/ลิงก์</th>
+              <th width="15%">จำนวนผู้ติดตาม</th>
+              <th width="15%">วันที่ตรวจสอบ</th>
+            </tr>
+          </thead>
+          <tbody id="socialTable">
+            <tr>
+              <td class="text-center">๑</td>
+              <td class="align-middle">Facebook</td>
+              <td><input type="text" class="form-control form-control-sm soc-acc"></td>
+              <td><input type="text" class="form-control form-control-sm soc-url"></td>
+              <td><input type="text" class="form-control form-control-sm soc-fol"></td>
+              <td><input type="date" class="form-control form-control-sm soc-date"></td>
+            </tr>
+            <tr>
+              <td class="text-center">๒</td>
+              <td class="align-middle">TikTok</td>
+              <td><input type="text" class="form-control form-control-sm soc-acc"></td>
+              <td><input type="text" class="form-control form-control-sm soc-url"></td>
+              <td><input type="text" class="form-control form-control-sm soc-fol"></td>
+              <td><input type="date" class="form-control form-control-sm soc-date"></td>
+            </tr>
+            <tr>
+              <td class="text-center">๓</td>
+              <td class="align-middle">Instagram</td>
+              <td><input type="text" class="form-control form-control-sm soc-acc"></td>
+              <td><input type="text" class="form-control form-control-sm soc-url"></td>
+              <td><input type="text" class="form-control form-control-sm soc-fol"></td>
+              <td><input type="date" class="form-control form-control-sm soc-date"></td>
+            </tr>
+            <tr>
+              <td class="text-center">๔</td>
+              <td class="align-middle">YouTube</td>
+              <td><input type="text" class="form-control form-control-sm soc-acc"></td>
+              <td><input type="text" class="form-control form-control-sm soc-url"></td>
+              <td><input type="text" class="form-control form-control-sm soc-fol"></td>
+              <td><input type="date" class="form-control form-control-sm soc-date"></td>
+            </tr>
+            <tr>
+              <td class="text-center">๕</td>
+              <td class="align-middle">ช่องทางอื่น ๆ</td>
+              <td><input type="text" class="form-control form-control-sm soc-acc"></td>
+              <td><input type="text" class="form-control form-control-sm soc-url"></td>
+              <td><input type="text" class="form-control form-control-sm soc-fol"></td>
+              <td><input type="date" class="form-control form-control-sm soc-date"></td>
+            </tr>
+          </tbody>
+        </table>
+        <small class="text-danger">หมายเหตุ: หากช่องทางเป็นบัญชีส่วนตัวและไม่ประสงค์เปิดเผยต่อสาธารณะ โปรดระบุเฉพาะช่องทางที่ยินยอมเพื่อประกอบการพิจารณา</small>
+      </div>
+
+      <div class="section-title d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <h5 class="m-0">🎬 ส่วนที่ ๓: ผลงานหรือประสบการณ์ด้านการสร้างสรรค์เนื้อหา (ถ้ามี)</h5>
+        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addPortfolioRow()">+ เพิ่มผลงาน</button>
+      </div>
+      <small class="text-muted d-block mb-3">ตัวอย่างลักษณะผลงาน: คลิปวิดีโอ คลิปสั้น ภาพถ่าย อินโฟกราฟิก บทความ การเป็นพิธีกร การสัมภาษณ์ หรือเนื้อหาประชาสัมพันธ์อื่น ๆ</small>
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+          <thead>
+            <tr>
+              <th width="5%">ลำดับ</th>
+              <th width="30%">ชื่อผลงาน / หัวข้อ</th>
+              <th width="25%">ลักษณะผลงาน</th>
+              <th width="20%">URL / ลิงก์ผลงาน</th>
+              <th width="20%">บทบาทของผู้ได้รับการเสนอชื่อ</th>
+            </tr>
+          </thead>
+          <tbody id="portfolioTable">
+            <tr>
+              <td class="text-center row-num">๑</td>
+              <td><input type="text" class="form-control form-control-sm port-name"></td>
+              <td><input type="text" class="form-control form-control-sm port-type"></td>
+              <td><input type="text" class="form-control form-control-sm port-url"></td>
+              <td><input type="text" class="form-control form-control-sm port-role"></td>
+            </tr>
+            <tr>
+              <td class="text-center row-num">๒</td>
+              <td><input type="text" class="form-control form-control-sm port-name"></td>
+              <td><input type="text" class="form-control form-control-sm port-type"></td>
+              <td><input type="text" class="form-control form-control-sm port-url"></td>
+              <td><input type="text" class="form-control form-control-sm port-role"></td>
+            </tr>
+            <tr>
+              <td class="text-center row-num">๓</td>
+              <td><input type="text" class="form-control form-control-sm port-name"></td>
+              <td><input type="text" class="form-control form-control-sm port-type"></td>
+              <td><input type="text" class="form-control form-control-sm port-url"></td>
+              <td><input type="text" class="form-control form-control-sm port-role"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-title">
+        <h5>🚀 ส่วนที่ ๔: ความพร้อมในการร่วมดำเนินงานประชาสัมพันธ์</h5>
+      </div>
+      
+      <div class="row g-4">
+        <div class="col-md-6">
+          <label class="form-label fw-bold text-primary">ความพร้อม (เลือกได้มากกว่า ๑ ข้อ):</label>
+          
+          <div class="form-check mb-2">
+            <input class="form-check-input chk-ready" type="checkbox" id="r1" value="พร้อมนำเสนอหน้ากล้องหรือร่วมให้สัมภาษณ์">
+            <label class="form-check-label" for="r1">พร้อมนำเสนอหน้ากล้องหรือร่วมให้สัมภาษณ์</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input chk-ready" type="checkbox" id="r2" value="พร้อมคิดประเด็น / เขียนบท / ออกแบบเนื้อหา">
+            <label class="form-check-label" for="r2">พร้อมคิดประเด็น / เขียนบท / ออกแบบเนื้อหา</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input chk-ready" type="checkbox" id="r3" value="พร้อมถ่ายทำหรือตัดต่อสื่อด้วยตนเอง">
+            <label class="form-check-label" for="r3">พร้อมถ่ายทำหรือตัดต่อสื่อด้วยตนเอง</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input chk-ready" type="checkbox" id="r4" value="พร้อมร่วมผลิตสื่อกับกลุ่มสื่อสารองค์กรตามที่ได้รับการประสาน">
+            <label class="form-check-label" for="r4">พร้อมร่วมผลิตสื่อกับกลุ่มสื่อสารองค์กรตามที่ได้รับการประสาน</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input chk-ready" type="checkbox" id="r5" value="ยินดีเข้ารับการอบรมหรือพัฒนาทักษะเพิ่มเติม">
+            <label class="form-check-label" for="r5">ยินดีเข้ารับการอบรมหรือพัฒนาทักษะเพิ่มเติม</label>
+          </div>
+          <div class="form-check mb-2 mt-3">
+            <input class="form-check-input chk-ready" type="checkbox" id="chkLimit" value="มีข้อจำกัดด้านเวลา / อุปกรณ์ / การเดินทาง">
+            <label class="form-check-label" for="chkLimit">มีข้อจำกัดด้านเวลา / อุปกรณ์ / การเดินทาง (โปรดระบุ)</label>
+            <input type="text" class="form-control custom-dotted-input mt-2" id="limitations" placeholder="ระบุข้อจำกัดของคุณที่นี่...">
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold text-primary">รูปแบบเนื้อหาที่สนใจหรืออยากมีส่วนร่วม (เลือกได้มากกว่า ๑ ข้อ):</label>
+          
+          <div class="form-check mb-2">
+            <input class="form-check-input chk-content" type="checkbox" id="c1" value="ภารกิจและบทบาทของกรมคุมประพฤติ">
+            <label class="form-check-label" for="c1">ภารกิจและบทบาทของกรมคุมประพฤติ</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input chk-content" type="checkbox" id="c2" value="การแก้ไขฟื้นฟูผู้กระทำผิดและการคืนคนดีสู่สังคม">
+            <label class="form-check-label" for="c2">การแก้ไขฟื้นฟูผู้กระทำผิดและการคืนคนดีสู่สังคม</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input chk-content" type="checkbox" id="c3" value="เรื่องราวการทำงานของเจ้าหน้าที่และเครือข่าย">
+            <label class="form-check-label" for="c3">เรื่องราวการทำงานของเจ้าหน้าที่และเครือข่าย</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input chk-content" type="checkbox" id="c4" value="กิจกรรมหรือบริการที่เป็นประโยชน์ต่อประชาชน">
+            <label class="form-check-label" for="c4">กิจกรรมหรือบริการที่เป็นประโยชน์ต่อประชาชน</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input chk-content" type="checkbox" id="c5" value="คลิปสั้นให้ความรู้ / ตอบคำถาม / สร้างความเข้าใจ">
+            <label class="form-check-label" for="c5">คลิปสั้นให้ความรู้ / ตอบคำถาม / สร้างความเข้าใจ</label>
+          </div>
+          <div class="form-check mb-2 mt-3">
+            <input class="form-check-input chk-content" type="checkbox" id="chkOtherContent" value="อื่น ๆ">
+            <label class="form-check-label" for="chkOtherContent">อื่น ๆ</label>
+            <input type="text" class="form-control custom-dotted-input mt-2" id="otherContent" placeholder="ระบุรูปแบบเนื้อหาอื่น ๆ ที่นี่...">
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center mt-5 mb-3">
+        <button type="submit" class="btn btn-gradient btn-lg w-100 py-3" id="btnSubmit">
+          💾 บันทึกข้อมูลการลงทะเบียน
+        </button>
+      </div>
+    </form>
+  </div>
+  
+  <div id="adminDashboardSection" style="display:none;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3 class="m-0 text-primary">📊 Dashboard ผู้ดูแลระบบ</h3>
+      <button class="btn btn-outline-danger btn-sm" onclick="logoutAdmin()">ออกจากระบบ</button>
+    </div>
+    
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="dash-card">
+          <h5 class="text-muted">ผู้ลงทะเบียนทั้งหมด</h5>
+          <h2 id="dashTotal" class="text-primary fw-bold">0</h2>
+          <small>คน</small>
+        </div>
+      </div>
+      <div class="col-md-8">
+        <div class="dash-card">
+          <h5 class="text-muted">ข้อมูลอัปเดตล่าสุด</h5>
+          <div id="dashLatest" class="text-success fw-bold">-</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-striped table-bordered" style="font-size:0.9rem;">
+        <thead>
+          <tr class="table-primary">
+            <th>วันที่ลงทะเบียน</th>
+            <th>หน่วยงาน</th>
+            <th>ชื่อ-นามสกุล</th>
+            <th>ตำแหน่ง</th>
+            <th>เบอร์โทร</th>
+          </tr>
+        </thead>
+        <tbody id="adminTableBody">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div> 
+
+<footer class="text-center mt-4 mb-4 text-muted small" style="letter-spacing: 0.5px;">
+  © 2026 กลุ่มสื่อสารองค์กร สำนักงานเลขานุการกรม กรมคุมประพฤติ
+</footer>
+
+<img src="https://lh3.googleusercontent.com/d/1nRs4UgMCTC_6dGq093D8bWOt1B8PaQs3" 
+     class="mascot-btn" 
+     onclick="window.scrollTo({top: 0, behavior: 'smooth'})" 
+     alt="กลับขึ้นด้านบน">
+
+<div class="modal fade" id="adminLoginModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold" style="color: #764ba2;">🔒 เข้าสู่ระบบ Admin</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body pt-3">
+        <input type="text" id="adminUser" class="form-control mb-3" placeholder="Username" required>
+        <input type="password" id="adminPass" class="form-control mb-4" placeholder="Password" required>
+        <button class="btn btn-gradient w-100 py-2" onclick="loginAdmin()">🔓 เข้าระบบ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  const thaiNums = ['๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙', '๑๐', '๑๑', '๑๒', '๑๓', '๑๔', '๑๕'];
+  
+  let socialRowCount = 5;
+  function addSocialRow() {
+    socialRowCount++;
+    const tbody = document.getElementById('socialTable');
+    const tr = document.createElement('tr');
+    let numDisplay = socialRowCount <= 15 ? thaiNums[socialRowCount-1] : socialRowCount;
+    tr.innerHTML = `
+      <td class="text-center">${numDisplay}</td>
+      <td class="align-middle">ช่องทางอื่น ๆ</td>
+      <td><input type="text" class="form-control form-control-sm soc-acc"></td>
+      <td><input type="text" class="form-control form-control-sm soc-url"></td>
+      <td><input type="text" class="form-control form-control-sm soc-fol"></td>
+      <td><input type="date" class="form-control form-control-sm soc-date"></td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  let portRowCount = 3;
+  function addPortfolioRow() {
+    portRowCount++;
+    const tbody = document.getElementById('portfolioTable');
+    const tr = document.createElement('tr');
+    let numDisplay = portRowCount <= 15 ? thaiNums[portRowCount-1] : portRowCount;
+    tr.innerHTML = `
+      <td class="text-center row-num">${numDisplay}</td>
+      <td><input type="text" class="form-control form-control-sm port-name"></td>
+      <td><input type="text" class="form-control form-control-sm port-type"></td>
+      <td><input type="text" class="form-control form-control-sm port-url"></td>
+      <td><input type="text" class="form-control form-control-sm port-role"></td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  document.getElementById('regForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSubmit');
+    btn.disabled = true;
+    btn.innerHTML = '⏳ กำลังบันทึกข้อมูล...';
+
+    let socials = [];
+    document.querySelectorAll('#socialTable tr').forEach((tr) => {
+      let inputs = tr.querySelectorAll('input');
+      let platformText = tr.querySelectorAll('td')[1].innerText.trim();
+      socials.push({
+        platform: platformText,
+        account: inputs[0].value,
+        url: inputs[1].value,
+        followers: inputs[2].value,
+        date: inputs[3].value
+      });
+    });
+
+    let portfolio = [];
+    document.querySelectorAll('#portfolioTable tr').forEach(tr => {
+      let inputs = tr.querySelectorAll('input');
+      if(inputs[0].value || inputs[1].value || inputs[2].value || inputs[3].value) {
+        portfolio.push({
+          name: inputs[0].value,
+          type: inputs[1].value,
+          url: inputs[2].value,
+          role: inputs[3].value
+        });
+      }
+    });
+
+    let readiness = Array.from(document.querySelectorAll('.chk-ready:checked')).map(cb => cb.value);
+    let limitInput = document.getElementById('limitations').value;
+    if(document.getElementById('chkLimit').checked && limitInput) {
+      readiness.push("มีข้อจำกัด: " + limitInput);
+    }
+
+    let contentTypes = Array.from(document.querySelectorAll('.chk-content:checked')).map(cb => cb.value);
+    let otherContentInput = document.getElementById('otherContent').value;
+    if(document.getElementById('chkOtherContent').checked && otherContentInput) {
+      contentTypes.push("อื่นๆ: " + otherContentInput);
+    }
+
+    const formData = {
+      agency: document.getElementsByName('agency')[0].value,
+      fullname: document.getElementsByName('fullname')[0].value,
+      position: document.getElementsByName('position')[0].value,
+      empType: document.getElementsByName('empType')[0].value,
+      department: document.getElementsByName('department')[0].value,
+      phone: document.getElementsByName('phone')[0].value,
+      email: document.getElementsByName('email')[0].value,
+      coordinator: document.getElementsByName('coordinator')[0].value,
+      strengths: document.getElementsByName('strengths')[0].value,
+      socials: socials,
+      portfolio: portfolio,
+      readiness: readiness,
+      contentTypes: contentTypes
+    };
+
+    google.script.run
+      .withSuccessHandler(res => {
+        btn.disabled = false;
+        btn.innerHTML = '💾 บันทึกข้อมูลการลงทะเบียน';
+        if(res.status === 'success') {
+          Swal.fire('สำเร็จ!', res.message, 'success').then(() => {
+             document.getElementById('regForm').reset();
+             window.scrollTo({top: 0, behavior: 'smooth'});
+          });
+        } else {
+          Swal.fire('ข้อผิดพลาด!', res.message, 'error');
+        }
+      })
+      .withFailureHandler(err => {
+        btn.disabled = false;
+        btn.innerHTML = '💾 บันทึกข้อมูลการลงทะเบียน';
+        Swal.fire('ข้อผิดพลาด!', err.message, 'error');
+      })
+      .submitForm(formData);
+  });
+
+  document.getElementById('adminPass').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+      loginAdmin();
+    }
+  });
+
+  function loginAdmin() {
+    const user = document.getElementById('adminUser').value;
+    const pass = document.getElementById('adminPass').value;
+
+    if(!user || !pass) {
+      Swal.fire('แจ้งเตือน', 'กรุณากรอก Username และ Password', 'warning');
+      return;
+    }
+
+    Swal.fire({ title: 'กำลังตรวจสอบ...', didOpen: () => { Swal.showLoading() } });
+
+    google.script.run
+      .withSuccessHandler(res => {
+        if(res.status === 'success') {
+          Swal.close();
+          var modalElement = document.getElementById('adminLoginModal');
+          var modal = bootstrap.Modal.getInstance(modalElement);
+          modal.hide();
+
+          document.getElementById('registerSection').style.display = 'none';
+          document.getElementById('adminDashboardSection').style.display = 'block';
+          
+          let html = '';
+          let total = res.data.length;
+          
+          res.data.forEach(row => {
+            let dateObj = new Date(row[0]);
+            let dateStr = dateObj.toLocaleDateString('th-TH') + ' ' + dateObj.toLocaleTimeString('th-TH');
+            html += `<tr>
+              <td>${dateStr}</td>
+              <td>${row[1]}</td>
+              <td>${row[2]}</td>
+              <td>${row[3]}</td>
+              <td>${row[6]}</td>
+            </tr>`;
+          });
+          
+          document.getElementById('adminTableBody').innerHTML = html || '<tr><td colspan="5" class="text-center">ยังไม่มีข้อมูล</td></tr>';
+          
+          document.getElementById('dashTotal').innerText = total;
+          if(total > 0) {
+            let lastDate = new Date(res.data[res.data.length - 1][0]);
+            document.getElementById('dashLatest').innerText = lastDate.toLocaleDateString('th-TH') + ' ' + lastDate.toLocaleTimeString('th-TH');
+          }
+
+        } else {
+          Swal.fire('ผิดพลาด', res.message, 'error');
+        }
+      })
+      .getAdminData(user, pass);
+  }
+
+  function logoutAdmin() {
+    document.getElementById('adminUser').value = '';
+    document.getElementById('adminPass').value = '';
+    document.getElementById('registerSection').style.display = 'block';
+    document.getElementById('adminDashboardSection').style.display = 'none';
+  }
+</script>
+</body>
+</html>
