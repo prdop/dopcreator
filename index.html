@@ -6,6 +6,7 @@
   <title>DOP Creator 💜 นักสร้างสรรค์สื่อคุมประพฤติ</title>
   
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
   
   <style>
@@ -184,7 +185,7 @@
 
 <div class="admin-btn-container">
   <button class="admin-btn" data-bs-toggle="modal" data-bs-target="#adminLoginModal">
-    ผู้ดูแลระบบ
+    <i class="bi bi-shield-lock me-1"></i> ผู้ดูแลระบบ
   </button>
 </div>
 
@@ -424,16 +425,23 @@
 
       <div class="text-center mt-5 mb-3">
         <button type="submit" class="btn btn-gradient btn-lg w-100 py-3" id="btnSubmit">
-          💾 บันทึกข้อมูลการลงทะเบียน
+          <i class="bi bi-floppy-fill me-2"></i> บันทึกข้อมูลการลงทะเบียน
         </button>
       </div>
     </form>
   </div>
   
   <div id="adminDashboardSection" style="display:none;">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
       <h3 class="m-0 text-primary">📊 Dashboard ผู้ดูแลระบบ</h3>
-      <button class="btn btn-outline-danger btn-sm" onclick="logoutAdmin()">ออกจากระบบ</button>
+      <div>
+        <button class="btn btn-success btn-sm me-2 rounded-pill px-3" onclick="downloadCSV()">
+          <i class="bi bi-file-earmark-spreadsheet-fill"></i> ดาวน์โหลด CSV
+        </button>
+        <button class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="logoutAdmin()">
+          <i class="bi bi-box-arrow-right"></i> ออกจากระบบ
+        </button>
+      </div>
     </div>
     
     <div class="row mb-4">
@@ -461,6 +469,7 @@
             <th>ชื่อ-นามสกุล</th>
             <th>ตำแหน่ง</th>
             <th>เบอร์โทร</th>
+            <th class="text-center">จัดการ</th>
           </tr>
         </thead>
         <tbody id="adminTableBody">
@@ -480,6 +489,7 @@
      onclick="window.scrollTo({top: 0, behavior: 'smooth'})" 
      alt="กลับขึ้นด้านบน">
 
+<!-- Modal สำหรับ Admin Login -->
 <div class="modal fade" id="adminLoginModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-sm">
     <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
@@ -496,18 +506,49 @@
   </div>
 </div>
 
+<!-- Modal สำหรับดูรายละเอียด (View Details) -->
+<div class="modal fade" id="viewDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+      <div class="modal-header border-0 pb-0" style="background: rgba(118, 75, 162, 0.05);">
+        <h5 class="modal-title fw-bold" style="color: #764ba2;"><i class="bi bi-person-lines-fill"></i> ข้อมูลสรุปรายละเอียดผู้ได้รับการเสนอชื่อ</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body pt-4" id="viewDetailsBody">
+        <!-- ข้อมูลจะถูกจัดระเบียบแยกชัดเจนที่นี่ -->
+      </div>
+      <div class="modal-footer border-0 d-flex justify-content-between">
+        <button type="button" class="btn btn-outline-primary rounded-pill px-4" onclick="copySummaryText()">
+          <i class="bi bi-clipboard-check me-1"></i> คัดลอกสรุปส่งหัวหน้า
+        </button>
+        <div>
+          <button type="button" id="btnDownloadWord" class="btn btn-primary rounded-pill px-4 me-2" onclick="downloadWordDocument()">
+            <i class="bi bi-file-earmark-word-fill me-1"></i> ดาวน์โหลดเป็น Word
+          </button>
+          <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">ปิดหน้าต่าง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.js"></script>
 
 <script>
+  // ⚠️ ถ้านำไฟล์นี้ไปใช้บน GitHub ให้นำ URL ที่ได้จากการ Deploy มาใส่ตรงนี้ แต่ถ้ารันบน Apps Script ปล่อยว่างไว้ได้เลย
+  const WEB_APP_URL = ''; 
+
   const thaiNums = ['๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙', '๑๐', '๑๑', '๑๒', '๑๓', '๑๔', '๑๕'];
-  
-  let socialRowCount = 5;
+  let adminDataList = []; 
+  let currentSelectedIndex = null; 
+
   function addSocialRow() {
-    socialRowCount++;
-    const tbody = document.getElementById('socialTable');
+    let tbody = document.getElementById('socialTable');
+    let rowCount = tbody.rows.length + 1;
     const tr = document.createElement('tr');
-    let numDisplay = socialRowCount <= 15 ? thaiNums[socialRowCount-1] : socialRowCount;
+    let numDisplay = rowCount <= 15 ? thaiNums[rowCount-1] : rowCount;
     tr.innerHTML = `
       <td class="text-center">${numDisplay}</td>
       <td class="align-middle">ช่องทางอื่น ๆ</td>
@@ -519,12 +560,11 @@
     tbody.appendChild(tr);
   }
 
-  let portRowCount = 3;
   function addPortfolioRow() {
-    portRowCount++;
-    const tbody = document.getElementById('portfolioTable');
+    let tbody = document.getElementById('portfolioTable');
+    let rowCount = tbody.rows.length + 1;
     const tr = document.createElement('tr');
-    let numDisplay = portRowCount <= 15 ? thaiNums[portRowCount-1] : portRowCount;
+    let numDisplay = rowCount <= 15 ? thaiNums[rowCount-1] : rowCount;
     tr.innerHTML = `
       <td class="text-center row-num">${numDisplay}</td>
       <td><input type="text" class="form-control form-control-sm port-name"></td>
@@ -595,10 +635,36 @@
       contentTypes: contentTypes
     };
 
-    google.script.run
-      .withSuccessHandler(res => {
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(res => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="bi bi-floppy-fill me-2"></i> บันทึกข้อมูลการลงทะเบียน';
+          if(res.status === 'success') {
+            Swal.fire('สำเร็จ!', res.message, 'success').then(() => {
+               document.getElementById('regForm').reset();
+               window.scrollTo({top: 0, behavior: 'smooth'});
+            });
+          } else {
+            Swal.fire('ข้อผิดพลาด!', res.message, 'error');
+          }
+        })
+        .withFailureHandler(err => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="bi bi-floppy-fill me-2"></i> บันทึกข้อมูลการลงทะเบียน';
+          Swal.fire('ข้อผิดพลาด!', err.message, 'error');
+        })
+        .submitForm(formData);
+    } else {
+      fetch(WEB_APP_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'submitForm', formData: formData }),
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+      })
+      .then(response => response.json())
+      .then(res => {
         btn.disabled = false;
-        btn.innerHTML = '💾 บันทึกข้อมูลการลงทะเบียน';
+        btn.innerHTML = '<i class="bi bi-floppy-fill me-2"></i> บันทึกข้อมูลการลงทะเบียน';
         if(res.status === 'success') {
           Swal.fire('สำเร็จ!', res.message, 'success').then(() => {
              document.getElementById('regForm').reset();
@@ -608,19 +674,61 @@
           Swal.fire('ข้อผิดพลาด!', res.message, 'error');
         }
       })
-      .withFailureHandler(err => {
+      .catch(err => {
         btn.disabled = false;
-        btn.innerHTML = '💾 บันทึกข้อมูลการลงทะเบียน';
-        Swal.fire('ข้อผิดพลาด!', err.message, 'error');
-      })
-      .submitForm(formData);
+        btn.innerHTML = '<i class="bi bi-floppy-fill me-2"></i> บันทึกข้อมูลการลงทะเบียน';
+        Swal.fire('ข้อผิดพลาดระบบเครือข่าย!', err.message, 'error');
+      });
+    }
   });
 
   document.getElementById('adminPass').addEventListener('keypress', function (e) {
-    if (e.key === 'Enter') {
-      loginAdmin();
-    }
+    if (e.key === 'Enter') loginAdmin();
   });
+
+  function processAdminResponse(res) {
+    Swal.close();
+    if(res.status === 'success') {
+      var modalElement = document.getElementById('adminLoginModal');
+      var modal = bootstrap.Modal.getInstance(modalElement);
+      if(modal) modal.hide();
+
+      document.getElementById('registerSection').style.display = 'none';
+      document.getElementById('adminDashboardSection').style.display = 'block';
+      
+      adminDataList = res.data; 
+      
+      let html = '';
+      let total = res.data.length;
+      
+      res.data.forEach((row, index) => {
+        let dateObj = new Date(row[0]);
+        let dateStr = dateObj.toLocaleDateString('th-TH') + ' ' + dateObj.toLocaleTimeString('th-TH');
+        html += `<tr>
+          <td>${dateStr}</td>
+          <td>${row[1]}</td>
+          <td>${row[2]}</td>
+          <td>${row[3]}</td>
+          <td>${row[6]}</td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="viewDetails(${index})">
+              <i class="bi bi-eye"></i> ดูข้อมูล
+            </button>
+          </td>
+        </tr>`;
+      });
+      
+      document.getElementById('adminTableBody').innerHTML = html || '<tr><td colspan="6" class="text-center">ยังไม่มีข้อมูล</td></tr>';
+      
+      document.getElementById('dashTotal').innerText = total;
+      if(total > 0) {
+        let lastDate = new Date(res.data[res.data.length - 1][0]);
+        document.getElementById('dashLatest').innerText = lastDate.toLocaleDateString('th-TH') + ' ' + lastDate.toLocaleTimeString('th-TH');
+      }
+    } else {
+      Swal.fire('ผิดพลาด', res.message, 'error');
+    }
+  }
 
   function loginAdmin() {
     const user = document.getElementById('adminUser').value;
@@ -630,48 +738,350 @@
       Swal.fire('แจ้งเตือน', 'กรุณากรอก Username และ Password', 'warning');
       return;
     }
-
+    
     Swal.fire({ title: 'กำลังตรวจสอบ...', didOpen: () => { Swal.showLoading() } });
 
-    google.script.run
-      .withSuccessHandler(res => {
-        if(res.status === 'success') {
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(res => processAdminResponse(res))
+        .withFailureHandler(err => {
           Swal.close();
-          var modalElement = document.getElementById('adminLoginModal');
-          var modal = bootstrap.Modal.getInstance(modalElement);
-          modal.hide();
-
-          document.getElementById('registerSection').style.display = 'none';
-          document.getElementById('adminDashboardSection').style.display = 'block';
-          
-          let html = '';
-          let total = res.data.length;
-          
-          res.data.forEach(row => {
-            let dateObj = new Date(row[0]);
-            let dateStr = dateObj.toLocaleDateString('th-TH') + ' ' + dateObj.toLocaleTimeString('th-TH');
-            html += `<tr>
-              <td>${dateStr}</td>
-              <td>${row[1]}</td>
-              <td>${row[2]}</td>
-              <td>${row[3]}</td>
-              <td>${row[6]}</td>
-            </tr>`;
-          });
-          
-          document.getElementById('adminTableBody').innerHTML = html || '<tr><td colspan="5" class="text-center">ยังไม่มีข้อมูล</td></tr>';
-          
-          document.getElementById('dashTotal').innerText = total;
-          if(total > 0) {
-            let lastDate = new Date(res.data[res.data.length - 1][0]);
-            document.getElementById('dashLatest').innerText = lastDate.toLocaleDateString('th-TH') + ' ' + lastDate.toLocaleTimeString('th-TH');
-          }
-
-        } else {
-          Swal.fire('ผิดพลาด', res.message, 'error');
-        }
+          Swal.fire('ข้อผิดพลาดระบบ', err.message, 'error');
+        })
+        .getAdminData(user, pass);
+    } else {
+      fetch(WEB_APP_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'getAdminData', username: user, password: pass }),
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
       })
-      .getAdminData(user, pass);
+      .then(response => response.json())
+      .then(res => processAdminResponse(res))
+      .catch(err => {
+        Swal.close();
+        Swal.fire('ข้อผิดพลาดระบบเครือข่าย', err.message, 'error');
+      });
+    }
+  }
+
+  function viewDetails(index) {
+    currentSelectedIndex = index; 
+    const row = adminDataList[index];
+    
+    // จัดรูปแบบตาราง Socials ให้ชัดเจน
+    let socialTableHtml = '<p class="text-muted fst-italic">ไม่มีข้อมูลช่องทางโซเชียล</p>';
+    try {
+      let socials = JSON.parse(row[10]);
+      if (socials && socials.length > 0) {
+        socialTableHtml = `
+          <div class="table-responsive">
+            <table class="table table-bordered table-sm mb-0" style="font-size: 0.9rem;">
+              <thead class="table-light">
+                <tr>
+                  <th>แพลตฟอร์ม</th>
+                  <th>ชื่อบัญชี / ช่อง</th>
+                  <th>ลิงก์ (URL)</th>
+                  <th>ผู้ติดตาม</th>
+                  <th>วันที่ตรวจสอบ</th>
+                </tr>
+              </thead>
+              <tbody>`;
+        socials.forEach(s => {
+          if (s.account || s.url) {
+            socialTableHtml += `<tr>
+              <td><b>${s.platform || '-'}</b></td>
+              <td>${s.account || '-'}</td>
+              <td><a href="${s.url}" target="_blank" class="text-break">${s.url || '-'}</a></td>
+              <td><span class="badge bg-secondary">${s.followers || '-'}</span></td>
+              <td>${s.date || '-'}</td>
+            </tr>`;
+          }
+        });
+        socialTableHtml += `</tbody></table></div>`;
+      }
+    } catch(e) {}
+
+    // จัดรูปแบบตาราง Portfolio ให้ชัดเจน
+    let portTableHtml = '<p class="text-muted fst-italic">ไม่มีข้อมูลผลงาน</p>';
+    try {
+      let ports = JSON.parse(row[11]);
+      if (ports && ports.length > 0) {
+        portTableHtml = `
+          <div class="table-responsive">
+            <table class="table table-bordered table-sm mb-0" style="font-size: 0.9rem;">
+              <thead class="table-light">
+                <tr>
+                  <th>ชื่อผลงาน / หัวข้อ</th>
+                  <th>ลักษณะผลงาน</th>
+                  <th>ลิงก์ผลงาน</th>
+                  <th>บทบาทของผู้ได้รับการเสนอชื่อ</th>
+                </tr>
+              </thead>
+              <tbody>`;
+        ports.forEach(p => {
+          if (p.name || p.url) {
+            portTableHtml += `<tr>
+              <td><b>${p.name || '-'}</b></td>
+              <td>${p.type || '-'}</td>
+              <td><a href="${p.url}" target="_blank" class="text-break">${p.url || '-'}</a></td>
+              <td><span class="badge bg-info text-dark">${p.role || '-'}</span></td>
+            </tr>`;
+          }
+        });
+        portTableHtml += `</tbody></table></div>`;
+      }
+    } catch(e) {}
+
+    const html = `
+      <div class="container-fluid px-0">
+        <!-- ส่วนที่ 1 -->
+        <div class="card mb-3 border-0 shadow-sm">
+          <div class="card-header bg-light fw-bold text-primary">🏢 ส่วนที่ ๑: ข้อมูลสำนักงานและผู้ได้รับการเสนอชื่อ</div>
+          <div class="card-body">
+            <div class="row g-2" style="font-size: 0.95rem;">
+              <div class="col-md-6"><b>📅 วันที่ลงทะเบียน:</b> ${new Date(row[0]).toLocaleString('th-TH')}</div>
+              <div class="col-md-6"><b>🏢 หน่วยงาน:</b> ${row[1]}</div>
+              <div class="col-md-6"><b>👤 ชื่อ-นามสกุล:</b> ${row[2]}</div>
+              <div class="col-md-6"><b>💼 ตำแหน่ง:</b> ${row[3]} (${row[4]})</div>
+              <div class="col-md-6"><b>📍 สังกัด:</b> ${row[5]}</div>
+              <div class="col-md-6"><b>🤝 ผู้ประสานงาน:</b> ${row[8] || '-'}</div>
+              <div class="col-md-6"><b>📞 เบอร์โทรศัพท์:</b> ${row[6]}</div>
+              <div class="col-md-6"><b>📧 อีเมล:</b> ${row[7]}</div>
+              <div class="col-12 mt-2">
+                <b>🌟 จุดเด่น / ความสามารถ:</b>
+                <div class="p-2 bg-light rounded mt-1 border">${row[9] || '-'}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ส่วนที่ 2 -->
+        <div class="card mb-3 border-0 shadow-sm">
+          <div class="card-header bg-light fw-bold text-primary">📱 ส่วนที่ ๒: ข้อมูลช่องทางสื่อสังคมออนไลน์</div>
+          <div class="card-body p-2">
+            ${socialTableHtml}
+          </div>
+        </div>
+
+        <!-- ส่วนที่ 3 -->
+        <div class="card mb-3 border-0 shadow-sm">
+          <div class="card-header bg-light fw-bold text-primary">🎬 ส่วนที่ ๓: ผลงานหรือประสบการณ์ด้านการสร้างสรรค์เนื้อหา</div>
+          <div class="card-body p-2">
+            ${portTableHtml}
+          </div>
+        </div>
+
+        <!-- ส่วนที่ 4 -->
+        <div class="card mb-0 border-0 shadow-sm">
+          <div class="card-header bg-light fw-bold text-primary">🚀 ส่วนที่ ๔: ความพร้อมและรูปแบบเนื้อหา</div>
+          <div class="card-body">
+            <div class="row g-2" style="font-size: 0.95rem;">
+              <div class="col-12">
+                <b>🚀 ความพร้อมในการร่วมงาน:</b>
+                <div class="p-2 bg-light rounded mt-1 border">${row[12] || '-'}</div>
+              </div>
+              <div class="col-12 mt-2">
+                <b>🎯 รูปแบบเนื้อหาที่สนใจ:</b>
+                <div class="p-2 bg-light rounded mt-1 border">${row[13] || '-'}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.getElementById('viewDetailsBody').innerHTML = html;
+    var myModal = new bootstrap.Modal(document.getElementById('viewDetailsModal'));
+    myModal.show();
+  }
+
+  // 📋 ฟังก์ชันคัดลอกสรุปส่งหัวหน้า
+  function copySummaryText() {
+    if (currentSelectedIndex === null) return;
+    const row = adminDataList[currentSelectedIndex];
+
+    let text = `📋 รายงานข้อมูลผู้ได้รับการเสนอชื่อ DOP Creator\n`;
+    text += `--------------------------------------------------\n`;
+    text += `📅 วันที่ลงทะเบียน: ${new Date(row[0]).toLocaleString('th-TH')}\n`;
+    text += `🏢 หน่วยงาน: ${row[1]}\n`;
+    text += `👤 ชื่อ-นามสกุล: ${row[2]} (${row[3]} - ${row[4]})\n`;
+    text += `📍 สังกัด: ${row[5]}\n`;
+    text += `📞 โทรศัพท์: ${row[6]} | อีเมล: ${row[7]}\n`;
+    text += `🤝 ผู้ประสานงาน: ${row[8] || '-'}\n\n`;
+    text += `🌟 จุดเด่น: ${row[9] || '-'}\n\n`;
+    text += `🚀 ความพร้อม: ${row[12] || '-'}\n`;
+    text += `🎯 รูปแบบเนื้อหา: ${row[13] || '-'}\n`;
+    text += `--------------------------------------------------`;
+
+    navigator.clipboard.writeText(text).then(() => {
+      Swal.fire({
+        icon: 'success',
+        title: 'คัดลอกสำเร็จ!',
+        text: 'สามารถนำไปวางใน LINE หรือ Word เพื่อส่งหัวหน้าได้ทันที',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    }).catch(err => {
+      Swal.fire('ข้อผิดพลาด', 'ไม่สามารถคัดลอกข้อความได้', 'error');
+    });
+  }
+
+  function downloadWordDocument() {
+    if (currentSelectedIndex === null) return;
+    const row = adminDataList[currentSelectedIndex];
+
+    let socialTableHtml = '<p><i>ไม่มีข้อมูลช่องทางโซเชียล</i></p>';
+    try {
+      let socials = JSON.parse(row[10]);
+      if (socials && socials.length > 0) {
+        socialTableHtml = `
+          <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%; font-family: 'Prompt', sans-serif; font-size: 14px; margin-bottom: 15px;">
+            <tr style="background-color: #f1ebfd; color: #764ba2;">
+              <th style="border: 1px solid #dcd6f7; padding: 8px;">แพลตฟอร์ม</th>
+              <th style="border: 1px solid #dcd6f7; padding: 8px;">ชื่อบัญชี / ช่อง</th>
+              <th style="border: 1px solid #dcd6f7; padding: 8px;">ลิงก์ (URL)</th>
+              <th style="border: 1px solid #dcd6f7; padding: 8px;">ผู้ติดตาม</th>
+              <th style="border: 1px solid #dcd6f7; padding: 8px;">วันที่ตรวจสอบ</th>
+            </tr>`;
+        socials.forEach(s => {
+          if (s.account || s.url) {
+            socialTableHtml += `<tr>
+              <td style="border: 1px solid #ddd; padding: 8px;"><b>${s.platform || '-'}</b></td>
+              <td style="border: 1px solid #ddd; padding: 8px;">${s.account || '-'}</td>
+              <td style="border: 1px solid #ddd; padding: 8px; color: #0066cc;">${s.url || '-'}</td>
+              <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${s.followers || '-'}</td>
+              <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${s.date || '-'}</td>
+            </tr>`;
+          }
+        });
+        socialTableHtml += `</table>`;
+      }
+    } catch(e) {}
+
+    let portTableHtml = '<p><i>ไม่มีข้อมูลผลงาน</i></p>';
+    try {
+      let ports = JSON.parse(row[11]);
+      if (ports && ports.length > 0) {
+        portTableHtml = `
+          <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%; font-family: 'Prompt', sans-serif; font-size: 14px; margin-bottom: 15px;">
+            <tr style="background-color: #f1ebfd; color: #764ba2;">
+              <th style="border: 1px solid #dcd6f7; padding: 8px;">ชื่อผลงาน / หัวข้อ</th>
+              <th style="border: 1px solid #dcd6f7; padding: 8px;">ลักษณะผลงาน</th>
+              <th style="border: 1px solid #dcd6f7; padding: 8px;">ลิงก์ผลงาน</th>
+              <th style="border: 1px solid #dcd6f7; padding: 8px;">บทบาท</th>
+            </tr>`;
+        ports.forEach(p => {
+          if (p.name || p.url) {
+            portTableHtml += `<tr>
+              <td style="border: 1px solid #ddd; padding: 8px;"><b>${p.name || '-'}</b></td>
+              <td style="border: 1px solid #ddd; padding: 8px;">${p.type || '-'}</td>
+              <td style="border: 1px solid #ddd; padding: 8px; color: #0066cc;">${p.url || '-'}</td>
+              <td style="border: 1px solid #ddd; padding: 8px;">${p.role || '-'}</td>
+            </tr>`;
+          }
+        });
+        portTableHtml += `</table>`;
+      }
+    } catch(e) {}
+
+    let wordHtml = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/1999/xhtml'>
+      <head><meta charset='utf-8'><title>DOP Creator Report</title></head>
+      <body style="font-family: 'Prompt', sans-serif; font-size: 15px; color: #333; line-height: 1.6; padding: 20px;">
+        <h2 style="text-align: center; color: #764ba2; margin-bottom: 5px;">รายงานข้อมูลสรุปผู้ได้รับการเสนอชื่อ DOP Creator</h2>
+        <h3 style="text-align: center; color: #555; margin-top: 0; margin-bottom: 25px;">กรมคุมประพฤติ</h3>
+        
+        <!-- ส่วนที่ 1 -->
+        <div style="background-color: #f8f9fa; border-left: 4px solid #764ba2; padding: 12px; margin-bottom: 15px;">
+          <h4 style="color: #764ba2; margin: 0 0 10px 0;">🏢 ส่วนที่ ๑: ข้อมูลสำนักงานและผู้ได้รับการเสนอชื่อ</h4>
+          <table style="width: 100%; font-size: 14px;">
+            <tr>
+              <td style="padding: 4px 0; width: 50%;"><b>📅 วันที่ลงทะเบียน:</b> ${new Date(row[0]).toLocaleString('th-TH')}</td>
+              <td style="padding: 4px 0; width: 50%;"><b>🏢 หน่วยงาน:</b> ${row[1]}</td>
+            </tr>
+            <tr>
+              <td style="padding: 4px 0;"><b>👤 ชื่อ-นามสกุล:</b> ${row[2]}</td>
+              <td style="padding: 4px 0;"><b>💼 ตำแหน่ง:</b> ${row[3]} (${row[4]})</td>
+            </tr>
+            <tr>
+              <td style="padding: 4px 0;"><b>📍 สังกัด:</b> ${row[5]}</td>
+              <td style="padding: 4px 0;"><b>🤝 ผู้ประสานงาน:</b> ${row[8] || '-'}</td>
+            </tr>
+            <tr>
+              <td style="padding: 4px 0;"><b>📞 เบอร์โทรศัพท์:</b> ${row[6]}</td>
+              <td style="padding: 4px 0;"><b>📧 อีเมล:</b> ${row[7]}</td>
+            </tr>
+          </table>
+          <p style="margin: 10px 0 0 0;"><b>🌟 จุดเด่น / ความสามารถ:</b></p>
+          <div style="background: #ffffff; padding: 8px; border: 1px solid #ddd; margin-top: 4px;">${row[9] || '-'}</div>
+        </div>
+
+        <!-- ส่วนที่ 2 -->
+        <div style="background-color: #f8f9fa; border-left: 4px solid #764ba2; padding: 12px; margin-bottom: 15px;">
+          <h4 style="color: #764ba2; margin: 0 0 10px 0;">📱 ส่วนที่ ๒: ข้อมูลช่องทางสื่อสังคมออนไลน์</h4>
+          ${socialTableHtml}
+        </div>
+
+        <!-- ส่วนที่ 3 -->
+        <div style="background-color: #f8f9fa; border-left: 4px solid #764ba2; padding: 12px; margin-bottom: 15px;">
+          <h4 style="color: #764ba2; margin: 0 0 10px 0;">🎬 ส่วนที่ ๓: ผลงานหรือประสบการณ์ด้านการสร้างสรรค์เนื้อหา</h4>
+          ${portTableHtml}
+        </div>
+
+        <!-- ส่วนที่ 4 -->
+        <div style="background-color: #f8f9fa; border-left: 4px solid #764ba2; padding: 12px; margin-bottom: 15px;">
+          <h4 style="color: #764ba2; margin: 0 0 10px 0;">🚀 ส่วนที่ ๔: ความพร้อมและรูปแบบเนื้อหา</h4>
+          <p style="margin: 5px 0 2px 0;"><b>🚀 ความพร้อมในการร่วมงาน:</b></p>
+          <div style="background: #ffffff; padding: 8px; border: 1px solid #ddd; margin-bottom: 8px;">${row[12] || '-'}</div>
+          <p style="margin: 5px 0 2px 0;"><b>🎯 รูปแบบเนื้อหาที่สนใจ:</b></p>
+          <div style="background: #ffffff; padding: 8px; border: 1px solid #ddd;">${row[13] || '-'}</div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    let converted = htmlDocx.asBlob(wordHtml);
+    let filename = `DOP_Creator_${row[2].replace(/\s+/g, '_')}.docx`;
+    
+    let url = URL.createObjectURL(converted);
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  function downloadCSV() {
+    if (!adminDataList || adminDataList.length === 0) {
+      Swal.fire('แจ้งเตือน', 'ไม่มีข้อมูลสำหรับดาวน์โหลด', 'warning');
+      return;
+    }
+    
+    let csvContent = "\uFEFF"; 
+    const headers = [
+      "Timestamp", "หน่วยงาน", "ชื่อ-นามสกุล", "ตำแหน่ง", "ประเภทบุคลากร",
+      "สังกัด", "เบอร์โทรศัพท์", "อีเมล", "ผู้ประสานงาน", "จุดเด่น",
+      "ช่องทางโซเชียล (JSON)", "ผลงาน (JSON)", "ความพร้อม", "รูปแบบเนื้อหา"
+    ];
+    csvContent += headers.join(",") + "\n";
+    
+    adminDataList.forEach(row => {
+      let csvRow = row.map(item => {
+        let cell = item === null || item === undefined ? "" : item.toString();
+        cell = cell.replace(/"/g, '""'); 
+        return `"${cell}"`; 
+      });
+      csvContent += csvRow.join(",") + "\n";
+    });
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `DOP_Creator_Data_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   function logoutAdmin() {
